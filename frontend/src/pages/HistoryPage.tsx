@@ -4,7 +4,7 @@ import { Expense, ExpenseFormData } from "../types";
 import YearNavigation from "../components/YearNavigation";
 import { MonthNavigation } from "../components/MonthNavigation";
 import CategoryBreakdown from "../components/CategoryBreakdown";
-import { CalendarExpenseTable } from "../components/CalendarExpenseTable";
+import { CalendarExpenseTable } from "../components/CalendarExpenseTable";  
 import { ExpenseForm } from "../components/ExpenseForm";
 import { Modal, Button } from "../vibes";
 import { COLORS } from "../constants/colors";

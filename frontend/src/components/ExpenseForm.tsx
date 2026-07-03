@@ -1,12 +1,8 @@
-/**
- * Form component for adding/editing expenses
- */
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ExpenseFormData } from "../types";
-import { EXPENSE_CATEGORIES } from "../constants/categories";
 import { TextField, SelectBox, Button } from "../vibes";
 import { useExpenseForm } from "../hooks/useExpenseForm";
+import { fetchCategories, createCategory } from "../services/api";
 
 interface ExpenseFormProps {
   initialData?: Partial<ExpenseFormData>;
@@ -21,10 +17,25 @@ export function ExpenseForm({
   onCancel,
   submitLabel = "Add Expense",
 }: ExpenseFormProps) {
+  const [customCategory, setCustomCategory] = useState("");
+
+  const handleFormSubmit = async (data: ExpenseFormData) => {
+    let finalCategory = data.category;
+    if (data.category === "Other" && customCategory.trim()) {
+      try {
+        const newCat = await createCategory(customCategory.trim());
+        finalCategory = newCat.name;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    await onSubmit({ ...data, category: finalCategory });
+  };
+
   const { formData, errors, isSubmitting, handleChange, handleSubmit } =
     useExpenseForm({
       initialData,
-      onSubmit,
+      onSubmit: handleFormSubmit,
     });
 
   const formStyle: React.CSSProperties = {
@@ -39,10 +50,19 @@ export function ExpenseForm({
     marginTop: "0.5rem",
   };
 
-  const categoryOptions = EXPENSE_CATEGORIES.map((category) => ({
-    value: category,
-    label: category,
-  }));
+  const [categories, setCategories] = useState<Array<{ id: number; name: string }>>([]);
+  useEffect(() => {
+    fetchCategories()
+      .then(setCategories)
+      .catch((err) => console.error(err));
+  }, []);
+  const categoryOptions = categories
+    .filter((c) => c.name !== "Other")
+    .concat(categories.filter((c) => c.name === "Other"))
+    .map((category) => ({
+      value: category.name,
+      label: category.name,
+    }));
 
   return (
     <form onSubmit={handleSubmit} style={formStyle}>
@@ -78,6 +98,17 @@ export function ExpenseForm({
         fullWidth
         required
       />
+
+      {formData.category === "Other" && (
+        <TextField
+          label="Custom Category"
+          placeholder="Enter custom category name"
+          value={customCategory}
+          onChange={(e) => setCustomCategory(e.target.value)}
+          fullWidth
+          required
+        />
+      )}
 
       <TextField
         label="Date"

@@ -17,7 +17,7 @@ RSpec.describe "Api::Expenses", type: :request do
     end
 
     it "returns expenses in descending order by date, then created_at" do
-       expense3 = Expense.create!(description: "Bus", amount: 20.00, category:
+      expense3 = Expense.create!(description: "Bus", amount: 20.00, category: transport_category, date: Date.yesterday)
       get "/api/expenses"
 
       json = JSON.parse(response.body)
